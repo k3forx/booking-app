@@ -186,6 +186,7 @@
     ></script>
     <script src="https://cdn.jsdelivr.net/npm/vanillajs-datepicker@1.1.4/dist/js/datepicker-full.min.js"></script>
     <script src="https://unpkg.com/notie"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
     <script>
       (function () {
         "use strict";
@@ -215,7 +216,8 @@
       document
         .getElementById("colorButton")
         .addEventListener("click", function () {
-          notify("This is my message", "success");
+          // notify("This is my message", "success");
+          notifyModal("Good job!", "<em>some text</em>", "success", "close");
         });
 
       const elem = document.getElementById("reservation-dates");
@@ -230,6 +232,15 @@
           stay: false,
           time: 3,
           position: "top",
+        });
+      }
+
+      function notifyModal(title, text, icon, confirmationButton) {
+        Swal.fire({
+          title: title,
+          html: text,
+          icon: icon,
+          confirmButtonText: confirmationButton,
         });
       }
     </script>
