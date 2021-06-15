@@ -13,6 +13,10 @@
       integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2"
       crossorigin="anonymous"
     />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/vanillajs-datepicker@1.1.4/dist/css/datepicker-bs4.min.css"
+    />
     <style>
       .my-footer {
         height: 5em;
@@ -111,39 +115,31 @@
           >
             <div class="form-row">
               <div class="col">
-                <div class="form-group">
-                  <label for="start_date">Starting Date</label>
-                  <input
-                    required
-                    type="date"
-                    class="form-control"
-                    id="start_date"
-                    name="start_date"
-                    aria-describedby="startDateHelp"
-                  />
-                  <small id="startDatelHelp" class="form-text text-muted"
-                    >Enter your starting date in the form of YYYY-MM-DD.</small
-                  >
-                </div>
-              </div>
+                <div class="form-row" id="reservation-dates">
+                  <div class="col">
+                    <input
+                      required
+                      class="form-control"
+                      type="text"
+                      name="start"
+                      placeholder="Arrival"
+                    />
+                  </div>
 
-              <div class="col">
-                <div class="form-group">
-                  <label for="end_data">Ending Date</label>
-                  <input
-                    required
-                    type="date"
-                    class="form-control"
-                    id="end_data"
-                    name="end_data"
-                    aria-describedby="endDateHelp"
-                  />
-                  <small id="endDateHelp" class="form-text text-muted"
-                    >Enter your ending date in the form of YYYY-MM-DD.</small
-                  >
+                  <div class="col">
+                    <input
+                      required
+                      class="form-control"
+                      type="text"
+                      name="end"
+                      placeholder="Departure"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
+
+            <hr />
 
             <button type="submit" class="btn btn-primary">
               Search Availability
@@ -180,6 +176,7 @@
       integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx"
       crossorigin="anonymous"
     ></script>
+    <script src="https://cdn.jsdelivr.net/npm/vanillajs-datepicker@1.1.4/dist/js/datepicker-full.min.js"></script>
     <script>
       (function () {
         "use strict";
@@ -189,22 +186,19 @@
             // Fetch all the forms we want to apply custom Bootstrap validation styles to
             let forms = document.getElementsByClassName("needs-validation");
             // Loop over them and prevent submission
-            Array.prototype.filter.call(
-              forms,
-              function (form) {
-                form.addEventListener(
-                  "submit",
-                  function (event) {
-                    if (form.checkValidity() === false) {
-                      event.preventDefault();
-                      event.stopPropagation();
-                    }
-                    form.classList.add("was-validated");
-                  },
-                  false
-                );
-              }
-            );
+            Array.prototype.filter.call(forms, function (form) {
+              form.addEventListener(
+                "submit",
+                function (event) {
+                  if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                  }
+                  form.classList.add("was-validated");
+                },
+                false
+              );
+            });
           },
           false
         );
@@ -220,6 +214,11 @@
             myEl.classList.add("redText");
           }
         });
+
+      const elem = document.getElementById("reservation-dates");
+      const rangepicker = new DateRangePicker(elem, {
+        format: "yyyy-mm-dd",
+      });
     </script>
   </body>
 </html>
