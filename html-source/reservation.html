@@ -25,6 +25,9 @@
       .room-image {
         max-width: 50%;
       }
+      .redText {
+        color: red;
+      }
     </style>
   </head>
   <body>
@@ -100,7 +103,12 @@
         <div class="col-md-6">
           <h1 class="mt-5">Search for Availability</h1>
 
-          <form action="reservation.html" method="GET">
+          <form
+            action="reservation.html"
+            method="GET"
+            novalidate
+            class="needs-validation"
+          >
             <div class="form-row">
               <div class="col">
                 <div class="form-group">
@@ -143,6 +151,17 @@
           </form>
         </div>
       </div>
+
+      <div class="row">
+        <div class="col">
+          <p id="myParagraph">This is some text</p>
+          <p>
+            <button id="colorButton" class="btn btn-outline-secondary">
+              Click me
+            </button>
+          </p>
+        </div>
+      </div>
     </div>
 
     <div class="row my-footer">
@@ -161,5 +180,46 @@
       integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx"
       crossorigin="anonymous"
     ></script>
+    <script>
+      (function () {
+        "use strict";
+        window.addEventListener(
+          "load",
+          function () {
+            // Fetch all the forms we want to apply custom Bootstrap validation styles to
+            let forms = document.getElementsByClassName("needs-validation");
+            // Loop over them and prevent submission
+            Array.prototype.filter.call(
+              forms,
+              function (form) {
+                form.addEventListener(
+                  "submit",
+                  function (event) {
+                    if (form.checkValidity() === false) {
+                      event.preventDefault();
+                      event.stopPropagation();
+                    }
+                    form.classList.add("was-validated");
+                  },
+                  false
+                );
+              }
+            );
+          },
+          false
+        );
+      })();
+      document
+        .getElementById("colorButton")
+        .addEventListener("click", function () {
+          let myEl = document.getElementById("myParagraph");
+
+          if (myEl.classList.contains("redText")) {
+            myEl.classList.remove("redText");
+          } else {
+            myEl.classList.add("redText");
+          }
+        });
+    </script>
   </body>
 </html>
