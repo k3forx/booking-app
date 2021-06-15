@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/k3forx/booking-app/pkg/config"
@@ -76,6 +78,27 @@ func (m *Repository) PostAvailability(w http.ResponseWriter, r *http.Request) {
 	start_date := r.Form.Get("start_date")
 	end_date := r.Form.Get("end_date")
 	w.Write([]byte(fmt.Sprintf("Start date is %s and end date is %s", start_date, end_date)))
+}
+
+type jsonResponse struct {
+	OK      bool   `json:"ok"`
+	Message string `json:"message"`
+}
+
+// AvailabilityJSON handles requests for availability and send JSON responses
+func (m *Repository) AvailabilityJSON(w http.ResponseWriter, r *http.Request) {
+	resp := jsonResponse{
+		OK:      true,
+		Message: "Available!",
+	}
+
+	out, err := json.MarshalIndent(resp, "", "     ")
+	if err != nil {
+		log.Println(err)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(out)
 }
 
 // Contact renders the contact page
