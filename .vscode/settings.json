@@ -1,9 +1,13 @@
 {
 	"cSpell.words": [
+		"CSRF",
 		"Swal",
+		"govalidator",
 		"justinas",
 		"nosurf",
 		"notie",
-		"rangepicker"
+		"novalidate",
+		"rangepicker",
+		"tmpl"
 	]
 }
