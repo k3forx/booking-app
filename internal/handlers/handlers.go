@@ -6,9 +6,9 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/k3forx/booking-app/pkg/config"
-	"github.com/k3forx/booking-app/pkg/models"
-	"github.com/k3forx/booking-app/pkg/render"
+	"github.com/k3forx/booking-app/internal/config"
+	"github.com/k3forx/booking-app/internal/models"
+	"github.com/k3forx/booking-app/internal/render"
 )
 
 // Repo is the repository used by the handlers
