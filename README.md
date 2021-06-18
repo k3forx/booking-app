@@ -53,3 +53,37 @@ Write migration in `...up.fizz` file.
 ```
 
 See https://gobuffalo.io/en/docs/db/migrations/ for more details.
+
+## After all migrations are completed
+
+There are several tables in `booking` database.
+
+```bash
+❯ docker exec -it postgres bash
+root@b983aecf24c2:/# psql -U root
+psql (13.3 (Debian 13.3-1.pgdg100+1))
+Type "help" for help.
+
+root=# \c booking;
+You are now connected to database "booking" as user "root".
+booking=# \d+;
+                                       List of relations
+ Schema |           Name           |   Type   | Owner | Persistence |    Size    | Description
+--------+--------------------------+----------+-------+-------------+------------+-------------
+ public | reservations             | table    | root  | permanent   | 8192 bytes |
+ public | reservations_id_seq      | sequence | root  | permanent   | 8192 bytes |
+ public | restrictions             | table    | root  | permanent   | 0 bytes    |
+ public | restrictions_id_seq      | sequence | root  | permanent   | 8192 bytes |
+ public | room_restrictions        | table    | root  | permanent   | 0 bytes    |
+ public | room_restrictions_id_seq | sequence | root  | permanent   | 8192 bytes |
+ public | rooms                    | table    | root  | permanent   | 0 bytes    |
+ public | rooms_id_seq             | sequence | root  | permanent   | 8192 bytes |
+ public | schema_migration         | table    | root  | permanent   | 8192 bytes |
+ public | users                    | table    | root  | permanent   | 8192 bytes |
+ public | users_id_seq             | sequence | root  | permanent   | 8192 bytes |
+(11 rows)
+
+booking=# exit
+root@b983aecf24c2:/# exit
+exit
+```
