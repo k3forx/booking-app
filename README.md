@@ -29,3 +29,27 @@ There are several ways to execute unit test.
 
 ❯ go test -coverprofile=coverage.out && go tool cover -html=coverage.out  # Show covered lines with html file on browser
 ```
+
+## Install `pop` package
+
+https://gobuffalo.io/en/docs/db/getting-started/
+
+> Pop makes it easy to do CRUD operations with basic ORM functionality, run migrations, and build/execute queries.
+
+```bash
+❯ go get github.com/gobuffalo/pop/...
+```
+
+### Migrations
+
+```bash
+❯ soda generate fizz CreateUsersTable
+```
+
+Write migration in `...up.fizz` file.
+
+```bash
+❯ soda migrate
+```
+
+See https://gobuffalo.io/en/docs/db/migrations/ for more details.
