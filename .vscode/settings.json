@@ -4,6 +4,7 @@
     "Swal",
     "asaskevich",
     "coverprofile",
+    "gobuffalo",
     "govalidator",
     "justinas",
     "nosurf",
