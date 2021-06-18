@@ -87,3 +87,9 @@ booking=# exit
 root@b983aecf24c2:/# exit
 exit
 ```
+
+### Re-create all tables
+
+```bash
+❯ soda reset
+```
