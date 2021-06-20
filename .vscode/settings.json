@@ -5,12 +5,18 @@
     "Swal",
     "asaskevich",
     "coverprofile",
+    "dbname",
+    "dbrepo",
     "gobuffalo",
     "govalidator",
+    "jackc",
     "justinas",
     "nosurf",
     "notie",
     "novalidate",
+    "pgconn",
+    "pgdg",
+    "psql",
     "rangepicker",
     "tmpl"
   ]
