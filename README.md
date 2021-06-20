@@ -93,3 +93,9 @@ exit
 ```bash
 ❯ soda reset
 ```
+
+## Questions
+
+- What is repository pattern in Golang?
+- All handlers (business logic) are depends on interface in repository.go?
+  - logic in main.go is not depended on interface?
