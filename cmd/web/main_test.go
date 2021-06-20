@@ -54,7 +54,7 @@ func testRun() error {
 
 	repo := handlers.NewTestRepo(&app)
 	handlers.NewHandlers(repo)
-	render.NewTemplate(&app)
+	render.NewRenderer(&app)
 	helpers.NewHelpers(&app)
 
 	return nil
