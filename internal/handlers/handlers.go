@@ -6,10 +6,13 @@ import (
 	"net/http"
 
 	"github.com/k3forx/booking-app/internal/config"
+	"github.com/k3forx/booking-app/internal/driver"
 	"github.com/k3forx/booking-app/internal/forms"
 	"github.com/k3forx/booking-app/internal/helpers"
 	"github.com/k3forx/booking-app/internal/models"
 	"github.com/k3forx/booking-app/internal/render"
+	"github.com/k3forx/booking-app/internal/repository"
+	"github.com/k3forx/booking-app/internal/repository/dbrepo"
 )
 
 // Repo is the repository used by the handlers
@@ -18,12 +21,21 @@ var Repo *Repository
 // Repository is the repository type
 type Repository struct {
 	App *config.AppConfig
+	DB  repository.DatabaseRepo
 }
 
 // NewRepo creates a new repository
-func NewRepo(a *config.AppConfig) *Repository {
+func NewRepo(a *config.AppConfig, db *driver.DB) *Repository {
 	return &Repository{
 		App: a,
+		DB:  dbrepo.NewPostgresRepo(a, db.SQL),
+	}
+}
+
+func NewTestRepo(a *config.AppConfig) *Repository {
+	return &Repository{
+		App: a,
+		DB:  dbrepo.NewTestingRepo(a),
 	}
 }
 
