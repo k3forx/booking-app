@@ -1,6 +1,8 @@
 package dbrepo
 
 import (
+	"time"
+
 	"github.com/k3forx/booking-app/internal/models"
 )
 
@@ -14,4 +16,13 @@ func (m *testDBRepo) InsertReservation(res models.Reservation) (int, error) {
 
 func (m *testDBRepo) InsertRoomRestriction(r models.RoomRestriction) error {
 	return nil
+}
+
+func (m *testDBRepo) SearchAvailabilityByDatesByRoomID(startDate, endDate time.Time, roomID int) (bool, error) {
+	return false, nil
+}
+
+func (m *testDBRepo) SearchAvailabilityForAllRooms(startDate, endDate time.Time) ([]models.Room, error) {
+	var rooms []models.Room
+	return rooms, nil
 }
