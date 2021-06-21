@@ -26,3 +26,8 @@ func (m *testDBRepo) SearchAvailabilityForAllRooms(startDate, endDate time.Time)
 	var rooms []models.Room
 	return rooms, nil
 }
+
+func (m *testDBRepo) GetRoomByID(id int) (models.Room, error) {
+	var room models.Room
+	return room, nil
+}
