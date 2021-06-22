@@ -2,7 +2,6 @@ package forms
 
 import (
 	"fmt"
-	"log"
 	"net/url"
 	"strings"
 
@@ -44,7 +43,6 @@ func (f *Form) Required(fields ...string) {
 
 // Valid returns true if there are not errors, otherwise false
 func (f *Form) Valid() bool {
-	log.Println("The number of errors: ", len(f.Errors))
 	return len(f.Errors) == 0
 }
 
