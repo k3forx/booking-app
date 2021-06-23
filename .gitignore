@@ -17,3 +17,5 @@ go.sum
 
 .DS_store
 main
+
+migrations/schema.sql

@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/gob"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -32,7 +31,7 @@ func main() {
 	}
 	defer db.SQL.Close()
 
-	fmt.Println(fmt.Sprintf("Starting application on port %s", portNumber))
+	app.InfoLog.Printf("Starting application on port %s", portNumber)
 
 	srv := &http.Server{
 		Addr:    portNumber,
@@ -66,12 +65,12 @@ func run() (*driver.DB, error) {
 
 	app.Session = session
 
-	log.Println("Connecting to database...")
+	app.InfoLog.Println("Connecting to database...")
 	db, err := driver.ConnectSQL("host=localhost port=5432 dbname=booking user=root password=root")
 	if err != nil {
 		log.Fatal("Cannot connect to database! Dying...")
 	}
-	log.Println("Connected to database!")
+	app.InfoLog.Println("Connected to database!")
 
 	tc, err := render.CreateTemplateCache()
 	if err != nil {
