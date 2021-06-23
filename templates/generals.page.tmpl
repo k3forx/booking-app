@@ -43,10 +43,10 @@
               <div class="col">
                 <div class="form-row" id="reservation-dates-modal">
                   <div class="col">
-                    <input disabled required class="form-control" type="text" name="start" id="start" placeholder="Arrival">
+                    <input disabled required class="form-control" type="text" name="start_date" id="start_date" placeholder="Arrival">
                   </div>
                   <div class="col">
-                    <input disabled required class="form-control" type="text" name="end" id="end" placeholder="Departure">
+                    <input disabled required class="form-control" type="text" name="end_date" id="end_date" placeholder="Departure">
                   </div>
               </div>
             </div>
@@ -65,17 +65,16 @@
           });
         },
         didOpen: () => {
-          document.getElementById("start").removeAttribute("disabled");
-          document.getElementById("end").removeAttribute("disabled");
+          document.getElementById("start_date").removeAttribute("disabled");
+          document.getElementById("end_date").removeAttribute("disabled");
         },
 
         callback: function (result) {
-          console.log("called");
-
           let form = document.getElementById("check-availability-form");
           let formData = new FormData(form);
           formData.append("csrf_token", "{{ .CSRFToken }}");
           formData.append("room_id", "1");
+          console.log(formData);
 
           fetch("/search-availability-json", {
             method: "post",

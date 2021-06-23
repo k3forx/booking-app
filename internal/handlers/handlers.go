@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -35,6 +34,7 @@ func NewRepo(a *config.AppConfig, db *driver.DB) *Repository {
 	}
 }
 
+// NewTestRepo creates a new repository for testing
 func NewTestRepo(a *config.AppConfig) *Repository {
 	return &Repository{
 		App: a,
@@ -263,7 +263,8 @@ func (m *Repository) AvailabilityJSON(w http.ResponseWriter, r *http.Request) {
 	roomID, _ := strconv.Atoi(r.Form.Get("room_id"))
 
 	available, err := m.DB.SearchAvailabilityByDatesByRoomID(startDate, endDate, roomID)
-	if err == nil {
+	if err != nil {
+		m.App.InfoLog.Println("failed to connect to database")
 		resp := jsonResponse{
 			OK:      false,
 			Message: "Error connecting to database",
@@ -275,7 +276,7 @@ func (m *Repository) AvailabilityJSON(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println("Return JSON response for available room")
+	m.App.InfoLog.Println("Return JSON response for available room")
 
 	resp := jsonResponse{
 		OK:        available,
