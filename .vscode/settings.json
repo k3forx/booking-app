@@ -4,6 +4,7 @@
     "Postgres",
     "Swal",
     "asaskevich",
+    "bcrypt",
     "coverprofile",
     "dbname",
     "dbrepo",
