@@ -6,33 +6,38 @@
     <div class="col">
       <h1>Login</h1>
 
-      <div class="form-group mt-3">
-        <label for="email">Email</label>
+      <form method="post" action="/user/login">
+        <input type="hidden" name="csrf_token" value="{{ .CSRFToken }}" />
 
-        {{ with .Form.Errors.Get "email" }}
-        <label class="text-danger">{{ . }}</label>
-        {{ end }}
+        <div class="form-group mt-3">
+          <label for="email">Email</label>
 
-        <input type="text" name="email" id="email" class="form-control
-        {{ with .Form.Errors.Get "email" }} is-invalid {{ end }}" required
-        value="" autocomplete="off" />
-      </div>
+          {{ with .Form.Errors.Get "email" }}
+          <label class="text-danger">{{ . }}</label>
+          {{ end }}
 
-      <div class="form-group">
-        <label for="password">Password</label>
+          <input type="text" name="email" id="email" class="form-control
+          {{ with .Form.Errors.Get "email" }} is-invalid {{ end }}" required
+          value="" autocomplete="off" />
+        </div>
 
-        {{ with .Form.Errors.Get "password" }}
-        <label class="text-danger">{{ . }}</label>
-        {{ end }}
+        <div class="form-group">
+          <label for="password">Password</label>
 
-        <input type="password" name="password" id="password" class="form-control
-        {{ with .Form.Errors.Get "password" }} is-invalid {{ end }}" required
-        value="" autocomplete="off" />
-      </div>
+          {{ with .Form.Errors.Get "password" }}
+          <label class="text-danger">{{ . }}</label>
+          {{ end }}
 
-      <hr />
+          <input type="password" name="password" id="password"
+          class="form-control
+          {{ with .Form.Errors.Get "password" }} is-invalid {{ end }}" required
+          value="" autocomplete="off" />
+        </div>
 
-      <input type="submit" class="btn btn-primary" value="Submit" />
+        <hr />
+
+        <input type="submit" class="btn btn-primary" value="Submit" />
+      </form>
     </div>
   </div>
 </div>
