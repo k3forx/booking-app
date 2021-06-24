@@ -360,3 +360,65 @@ func (m *postgresDBRepo) GetReservationByID(id int) (models.Reservation, error) 
 
 	return res, nil
 }
+
+// UpdateReservation updates a reservation in the database
+func (m *postgresDBRepo) UpdateReservation(res models.Reservation) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	query := `
+		UPDATE
+			reservations
+		SET
+			first_name = $1, last_name = $2, email = $3, phone = $4, updated_at = $5
+		WHERE
+			id = $6;
+	`
+
+	_, err := m.DB.ExecContext(ctx, query,
+		res.FirstName,
+		res.LastName,
+		res.Email,
+		res.Phone,
+		time.Now(),
+		res.ID,
+	)
+	if err != nil {
+		m.App.ErrorLog.Println("failed to update reservation")
+		return err
+	}
+
+	return nil
+}
+
+// DeleteReservationByID deletes a reservation by ID
+func (m *postgresDBRepo) DeleteReservationByID(id int) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	query := `DELETE FROM reservations WHERE id = $1;`
+
+	_, err := m.DB.ExecContext(ctx, query, id)
+	if err != nil {
+		m.App.ErrorLog.Printf("failed to delete a reservation by ID: %d, err: %s", id, err)
+		return err
+	}
+
+	return nil
+}
+
+// UpdateProcessedForReservation updates processed for reservation by ID
+func (m *postgresDBRepo) UpdateProcessedForReservation(id, processed int) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	query := `UPDATE reservations SET processed = $1 WHERE id = $2;`
+
+	_, err := m.DB.ExecContext(ctx, query, processed, id)
+	if err != nil {
+		m.App.ErrorLog.Printf("failed to update processed of a reservation by ID: %d, err: %s", id, err)
+		return err
+	}
+
+	return nil
+}
