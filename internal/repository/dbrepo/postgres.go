@@ -181,7 +181,7 @@ func (m *postgresDBRepo) UpdateUser(user models.User) error {
 }
 
 // Authenticate authenticates a user
-func (m *postgresDBRepo) Authenticate(email, testPassword string) (int, string, error) {
+func (m *postgresDBRepo) Authenticate(email, textPassword string) (int, string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
@@ -195,7 +195,7 @@ func (m *postgresDBRepo) Authenticate(email, testPassword string) (int, string, 
 		return id, "", err
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(testPassword))
+	err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(textPassword))
 	if err == bcrypt.ErrMismatchedHashAndPassword {
 		m.App.ErrorLog.Println("password is wrong")
 		return 0, "", errors.New("incorrect password")
