@@ -54,3 +54,8 @@ func (m *testDBRepo) UpdateUser(user models.User) error {
 func (m *testDBRepo) Authenticate(email, testPassword string) (int, string, error) {
 	return 0, "", nil
 }
+
+func (m *testDBRepo) AllReservations() ([]models.Reservation, error) {
+	var reservations []models.Reservation
+	return reservations, nil
+}
