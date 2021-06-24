@@ -19,6 +19,7 @@ Reservation Details
   class=""
   novalidate
 >
+  <input type="hidden" name="csrf_token" value="{{ .CSRFToken }}" />
   <input type="hidden" name="room_id" value="{{ $res.RoomID }}" />
 
   <div class="form-group mt-3">
@@ -44,8 +45,6 @@ Reservation Details
     {{ with .Form.Errors.Get "last_name" }} is-invalid {{ end }}" required
     value="{{ $res.LastName }}" autocomplete="off" >
   </div>
-
-  <input type="hidden" name="room_id" value="1" />
 
   <div class="form-group">
     <label for="email">Email:</label>

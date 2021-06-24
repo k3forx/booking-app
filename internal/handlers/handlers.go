@@ -475,6 +475,7 @@ func (m *Repository) AdminDashboard(w http.ResponseWriter, r *http.Request) {
 
 // AdminNewReservations shows all new reservations in admin tool
 func (m *Repository) AdminNewReservations(w http.ResponseWriter, r *http.Request) {
+	m.App.InfoLog.Println("AdminNewReservations starts")
 	reservations, err := m.DB.AllNewReservations()
 	if err != nil {
 		m.App.ErrorLog.Println("failed to get all reservations")
@@ -484,6 +485,8 @@ func (m *Repository) AdminNewReservations(w http.ResponseWriter, r *http.Request
 	data := make(map[string]interface{})
 	data["reservations"] = reservations
 
+	m.App.InfoLog.Println("AdminNewReservations is finished")
+
 	render.Template(w, r, "admin-new-reservations.page.tmpl", &models.TemplateData{
 		Data: data,
 	})
@@ -491,6 +494,7 @@ func (m *Repository) AdminNewReservations(w http.ResponseWriter, r *http.Request
 
 // AdminReservations shows all reservations in admin tool
 func (m *Repository) AdminAllReservations(w http.ResponseWriter, r *http.Request) {
+	m.App.InfoLog.Println("AdminALlReservations starts")
 	reservations, err := m.DB.AllReservations()
 	if err != nil {
 		m.App.ErrorLog.Println("failed to get all reservations")
@@ -500,6 +504,8 @@ func (m *Repository) AdminAllReservations(w http.ResponseWriter, r *http.Request
 	data := make(map[string]interface{})
 	data["reservations"] = reservations
 
+	m.App.InfoLog.Println("AdminALlReservations is finished")
+
 	render.Template(w, r, "admin-all-reservations.page.tmpl", &models.TemplateData{
 		Data: data,
 	})
@@ -507,6 +513,7 @@ func (m *Repository) AdminAllReservations(w http.ResponseWriter, r *http.Request
 
 // AdminShowReservation shows the reservation in admin tool
 func (m *Repository) AdminShowReservation(w http.ResponseWriter, r *http.Request) {
+	m.App.InfoLog.Println("AdminShowReservation starts")
 	exploded := strings.Split(r.RequestURI, "/")
 	id, err := strconv.Atoi(exploded[4])
 	if err != nil {
@@ -529,11 +536,59 @@ func (m *Repository) AdminShowReservation(w http.ResponseWriter, r *http.Request
 	data := make(map[string]interface{})
 	data["reservation"] = reservation
 
+	m.App.InfoLog.Printf("Show a reservation by ID: %d", id)
+	m.App.InfoLog.Println("AdminShowReservation is finished")
 	render.Template(w, r, "admin-reservation-show.page.tmpl", &models.TemplateData{
 		StringMap: stringMap,
 		Data:      data,
 		Form:      forms.New(nil),
 	})
+}
+
+// AdminPostShowReservation updates the reservation in admin tool
+func (m *Repository) AdminPostShowReservation(w http.ResponseWriter, r *http.Request) {
+	m.App.InfoLog.Println("AdminPostShowReservation starts")
+	err := r.ParseForm()
+	if err != nil {
+		m.App.ErrorLog.Println("cannot parse form")
+		http.Redirect(w, r, "/admin/dashboard", http.StatusTemporaryRedirect)
+		return
+	}
+
+	exploded := strings.Split(r.RequestURI, "/")
+	id, err := strconv.Atoi(exploded[4])
+	if err != nil {
+		m.App.ErrorLog.Panicln("cannot get ID from request URI")
+		return
+	}
+
+	src := exploded[3]
+	stringMap := make(map[string]string)
+	stringMap["src"] = src
+
+	m.App.InfoLog.Printf("Search a reservation by ID: %d", id)
+
+	res, err := m.DB.GetReservationByID(id)
+	if err != nil {
+		m.App.ErrorLog.Printf("failed to get a reservation by ID: %d, err: %s", id, err)
+		return
+	}
+
+	res.FirstName = r.Form.Get("first_name")
+	res.LastName = r.Form.Get("last_name")
+	res.Email = r.Form.Get("email")
+	res.Phone = r.Form.Get("phone")
+
+	err = m.DB.UpdateReservation(res)
+	if err != nil {
+		m.App.ErrorLog.Printf("failed to update a reservation by ID: %d, err: %s", id, err)
+		return
+	}
+	m.App.InfoLog.Printf("Updated a reservation")
+
+	m.App.Session.Put(r.Context(), "flash", "Changes saved")
+	m.App.InfoLog.Println("AdminPostShowReservation is finished")
+	http.Redirect(w, r, fmt.Sprintf("/admin/reservations-%s", src), http.StatusSeeOther)
 }
 
 // AdminReservationsCalendar displays the reservation calendar
