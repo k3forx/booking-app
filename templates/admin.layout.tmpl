@@ -34,8 +34,15 @@
       src="https://cdn.jsdelivr.net/npm/simple-datatables@latest"
       type="text/javascript"
     ></script>
+    <style>
+      label {
+        font-weight: bold;
+      }
+    </style>
     {{ block "css" .}}
-    {{ end }}
+    {{
+      end
+    }}
   </head>
 
   <body>
