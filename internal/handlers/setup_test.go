@@ -23,7 +23,13 @@ import (
 var app config.AppConfig
 var session *scs.SessionManager
 var pathToTemplates = "./../../templates"
-var functions = template.FuncMap{}
+var functions = template.FuncMap{
+	"humanDate": HumanDate,
+}
+
+func HumanDate(t time.Time) string {
+	return t.Format("2006-01-02")
+}
 
 func TestMain(m *testing.M) {
 	// what am I going to put in the session
@@ -118,11 +124,13 @@ func CreateTestTemplateCache() (map[string]*template.Template, error) {
 	}
 
 	for _, page := range pages {
+		app.InfoLog.Printf("parse page %s", page)
 		name := filepath.Base(page)
 
 		// Map functions to brackets in templates
 		ts, err := template.New(name).Funcs(functions).ParseFiles(page)
 		if err != nil {
+			app.ErrorLog.Printf("failed to parse page: %s", page)
 			return myCache, err
 		}
 
