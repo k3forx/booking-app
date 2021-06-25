@@ -34,9 +34,18 @@
       src="https://cdn.jsdelivr.net/npm/simple-datatables@latest"
       type="text/javascript"
     ></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://unpkg.com/notie/dist/notie.min.css"
+    />
+
     <style>
       label {
         font-weight: bold;
+      }
+      .notie-container {
+        z-index: 5000;
       }
     </style>
     {{ block "css" .}}
@@ -53,6 +62,44 @@
 
     {{ block "content" . }}
     {{ end }}
+
+    <script src="https://unpkg.com/notie"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+    <script src="/static/js/app.js"></script>
+
+    <script>
+      let attention = Prompt();
+      function notify(msg, msgType) {
+        notie.alert({
+          type: msgType,
+          text: msg,
+          stay: false,
+          time: 3,
+          position: "top",
+        });
+      }
+
+      function notifyModal(title, text, icon, confirmationButton) {
+        Swal.fire({
+          title: title,
+          html: text,
+          icon: icon,
+          confirmButtonText: confirmationButton,
+        });
+      }
+
+      {{ with .Error }}
+        notify("{{ . }}", "error");
+      {{ end }}
+
+      {{ with .Flash }}
+        notify("{{ . }}", "success");
+      {{ end }}
+
+      {{ with .Warning }}
+        notify("{{ . }}", "warning");
+      {{ end }}
+    </script>
 
     {{ block "js". }}
     {{ end }}
