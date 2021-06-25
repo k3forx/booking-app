@@ -609,3 +609,17 @@ func (m *Repository) AdminProcessReservation(w http.ResponseWriter, r *http.Requ
 	http.Redirect(w, r, fmt.Sprintf("/admin/reservations-%s", src), http.StatusSeeOther)
 	m.App.InfoLog.Println("AdminProcessReservation is finished")
 }
+
+// AdminDeleteReservation deletes a reservation
+func (m *Repository) AdminDeleteReservation(w http.ResponseWriter, r *http.Request) {
+	m.App.InfoLog.Println("AdminDeleteReservation starts")
+	id, _ := strconv.Atoi(chi.URLParam(r, "id"))
+	src := chi.URLParam(r, "src")
+
+	_ = m.DB.DeleteReservationByID(id)
+
+	m.App.Session.Put(r.Context(), "flash", "Reservation is deleted")
+
+	http.Redirect(w, r, fmt.Sprintf("/admin/reservations-%s", src), http.StatusSeeOther)
+	m.App.InfoLog.Println("AdminDeleteReservation is finished")
+}
