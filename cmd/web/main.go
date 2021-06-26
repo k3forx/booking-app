@@ -51,6 +51,7 @@ func run() (*driver.DB, error) {
 	gob.Register(models.User{})
 	gob.Register(models.Room{})
 	gob.Register(models.RoomRestriction{})
+	gob.Register(map[string]int{})
 
 	mailChan := make(chan models.MailData)
 	app.MailChan = mailChan
@@ -58,7 +59,7 @@ func run() (*driver.DB, error) {
 	// Change this to true when in production
 	app.InProduction = false
 
-	infoLog = log.New(os.Stdout, "[INFO]\t", log.Ldate|log.Ltime)
+	infoLog = log.New(os.Stdout, "[INFO]\t", log.Ldate|log.Ltime|log.Lmicroseconds|log.Lshortfile)
 	app.InfoLog = infoLog
 
 	errorLog = log.New(os.Stdout, "[ERROR]\t", log.Ldate|log.Ltime|log.Lshortfile)
@@ -81,7 +82,7 @@ func run() (*driver.DB, error) {
 
 	tc, err := render.CreateTemplateCache()
 	if err != nil {
-		log.Fatal("cannot create template cache")
+		app.ErrorLog.Printf("failed to create template cache: %s", err)
 		return nil, err
 	}
 

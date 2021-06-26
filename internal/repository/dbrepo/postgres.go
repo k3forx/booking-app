@@ -422,3 +422,94 @@ func (m *postgresDBRepo) UpdateProcessedForReservation(id, processed int) error 
 
 	return nil
 }
+
+func (m *postgresDBRepo) GetAllRooms() ([]models.Room, error) {
+	m.App.InfoLog.Printf("Get all rooms")
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var rooms []models.Room
+
+	query := `SELECT id, room_name, created_at, updated_at FROM rooms ORDER BY room_name;`
+
+	rows, err := m.DB.QueryContext(ctx, query)
+	if err != nil {
+		m.App.ErrorLog.Printf("failed to get all rooms: %s", err)
+		return rooms, err
+	}
+	m.App.InfoLog.Println("Get all rooms successfully")
+
+	for rows.Next() {
+		var room models.Room
+		err := rows.Scan(
+			&room.ID,
+			&room.RoomName,
+			&room.CreatedAt,
+			&room.UpdatedAt,
+		)
+		if err != nil {
+			return rooms, err
+		}
+		rooms = append(rooms, room)
+	}
+
+	if err = rows.Err(); err != nil {
+		return rooms, err
+	}
+
+	return rooms, nil
+}
+
+// GetRestrictionsForRoomByDate returns restrictions for a room by date range
+func (m *postgresDBRepo) GetRestrictionsForRoomByDate(roomID int, start, end time.Time) ([]models.RoomRestriction, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var restrictions []models.RoomRestriction
+
+	query := `
+		SELECT
+			id, COALESCE(reservation_id, 0), restriction_id, room_id, start_date, end_date
+		FROM
+			room_restrictions
+		WHERE
+			$1 < end_date
+			AND
+				$2 >= start_date
+			AND
+				room_id = $3;
+	`
+
+	rows, err := m.DB.QueryContext(ctx, query, start, end, roomID)
+	if err != nil {
+		m.App.ErrorLog.Printf("failed to get room restrictions: %s", err)
+		return restrictions, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var r models.RoomRestriction
+		err := rows.Scan(
+			&r.ID,
+			&r.ReservationID,
+			&r.RestrictionID,
+			&r.RoomID,
+			&r.StartDate,
+			&r.EndDate,
+		)
+
+		if err != nil {
+			m.App.ErrorLog.Printf("failed to map to room restriction: %s", err)
+			return nil, err
+		}
+
+		restrictions = append(restrictions, r)
+	}
+
+	if err = rows.Err(); err != nil {
+		m.App.ErrorLog.Printf("failed to map to room restriction: %s", err)
+		return nil, err
+	}
+
+	return restrictions, nil
+}
