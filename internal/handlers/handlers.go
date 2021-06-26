@@ -593,7 +593,93 @@ func (m *Repository) AdminPostShowReservation(w http.ResponseWriter, r *http.Req
 
 // AdminReservationsCalendar displays the reservation calendar
 func (m *Repository) AdminReservationsCalendar(w http.ResponseWriter, r *http.Request) {
-	render.Template(w, r, "admin-all-reservations-calendar.page.tmpl", &models.TemplateData{})
+	m.App.InfoLog.Println("AdminReservationCalendar starts")
+	now := time.Now()
+
+	if r.URL.Query().Get("year") != "" {
+		year, _ := strconv.Atoi(r.URL.Query().Get("year"))
+		month, _ := strconv.Atoi(r.URL.Query().Get("month"))
+		now = time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.UTC)
+	}
+
+	data := make(map[string]interface{})
+	data["now"] = now
+
+	next := now.AddDate(0, 1, 0)
+	last := now.AddDate(0, -1, 0)
+
+	nextMonth := next.Format("01")
+	nextMonthYear := next.Format("2006")
+
+	lastMonth := last.Format("01")
+	lastMonthYear := last.Format("2006")
+
+	stringMap := make(map[string]string)
+	stringMap["next_month"] = nextMonth
+	stringMap["next_month_year"] = nextMonthYear
+	stringMap["last_month"] = lastMonth
+	stringMap["last_month_year"] = lastMonthYear
+
+	stringMap["this_month"] = now.Format("01")
+	stringMap["this_month_year"] = now.Format("2006")
+
+	// get the first and last days of the month
+	currentYear, currentMonth, _ := now.Date()
+	currentLocation := now.Location()
+	firstOfMonth := time.Date(currentYear, currentMonth, 1, 0, 0, 0, 0, currentLocation)
+	lastOfMonth := firstOfMonth.AddDate(0, 1, -1)
+
+	intMap := make(map[string]int)
+	intMap["days_in_month"] = lastOfMonth.Day()
+
+	rooms, err := m.DB.GetAllRooms()
+	if err != nil {
+		m.App.ErrorLog.Printf("failed to get all rooms: %s", err)
+		return
+	}
+
+	data["rooms"] = rooms
+
+	for _, room := range rooms {
+		reservationMap := make(map[string]int)
+		blockMap := make(map[string]int)
+
+		// Initialize reservationMap and blockMap
+		for d := firstOfMonth; d.After(lastOfMonth) == false; d = d.AddDate(0, 0, 1) {
+			reservationMap[d.Format("2006 01 2")] = 0
+			blockMap[d.Format("2006 01 2")] = 0
+		}
+
+		// Get all the restrictions from the current room
+		restrictions, err := m.DB.GetRestrictionsForRoomByDate(room.ID, firstOfMonth, lastOfMonth)
+		if err != nil {
+			m.App.ErrorLog.Printf("failed to get room restrictions: %s", err)
+			return
+		}
+
+		for _, r := range restrictions {
+			if r.ReservationID > 0 {
+				// It's a reservation
+				for d := r.StartDate; d.After(r.EndDate) == false; d = d.AddDate(0, 0, 1) {
+					reservationMap[d.Format("2006-01-02")] = r.ReservationID
+				}
+			} else {
+				// This is a block by owner
+				blockMap[r.StartDate.Format("2006-01-02")] = r.ID
+			}
+		}
+		data[fmt.Sprintf("reservation_map_%d", room.ID)] = reservationMap
+		data[fmt.Sprintf("block_map_%d", room.ID)] = blockMap
+		m.App.Session.Put(r.Context(), fmt.Sprintf("block_map_%d", room.ID), blockMap)
+	}
+
+	m.App.InfoLog.Println("AdminReservationCalendar is finished")
+
+	render.Template(w, r, "admin-reservations-calendar.page.tmpl", &models.TemplateData{
+		StringMap: stringMap,
+		Data:      data,
+		IntMap:    intMap,
+	})
 }
 
 // AdminProcessReservation marks a reservation as processed
