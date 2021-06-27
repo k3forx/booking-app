@@ -5,6 +5,8 @@ import (
 	"log"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
+	"strings"
 	"testing"
 
 	"github.com/k3forx/booking-app/internal/models"
@@ -22,15 +24,16 @@ var theTests = []struct {
 	{"ms", "/majors-suite", "GET", http.StatusOK},
 	{"sa", "/search-availability", "GET", http.StatusOK},
 	{"contact", "/contact", "GET", http.StatusOK},
+	{"non-existent", "/green/eggs/and/ham", "GET", http.StatusNotFound},
 
-	// {"post-search-avail", "/search-availability", "POST", []postData{
-	// 	{key: "start", value: "2020-01-01"},
-	// 	{key: "end", value: "2020-01-31"},
-	// }, http.StatusOK},
-	// {"post-search-avail-json", "/search-availability-json", "POST", []postData{
-	// 	{key: "start", value: "2020-01-01"},
-	// 	{key: "end", value: "2020-01-31"},
-	// }, http.StatusOK},
+	{"login", "/user/login", "GET", http.StatusOK},
+	{"logout", "/user/logout", "GET", http.StatusOK},
+
+	{"dashboard", "/admin/dashboard", "GET", http.StatusOK},
+	{"new res", "/admin/reservations-new", "GET", http.StatusOK},
+	{"all res", "/admin/reservations-all", "GET", http.StatusOK},
+	{"all res", "/admin/reservations-all", "GET", http.StatusOK},
+	{"show res", "/admin/reservations/new/1/show", "GET", http.StatusOK},
 }
 
 func TestHandlers(t *testing.T) {
@@ -318,6 +321,68 @@ func TestRepository_PostReservation(t *testing.T) {
 // 		t.Error("failed to parse json")
 // 	}
 // }
+
+var loginTest = []struct {
+	name               string
+	email              string
+	expectedStatusCode int
+	expectedHTML       string
+	expectedLocation   string
+}{
+	{
+		"valid-credentials", "me@here.ca", http.StatusSeeOther, "", "/",
+	},
+	{
+		"invalid-credentials", "jack@nimble.com", http.StatusSeeOther, "", "/user/login",
+	},
+	{
+		"invalid-date", "j", http.StatusOK, `action="/user/login"`, "",
+	},
+}
+
+func TestLogin(t *testing.T) {
+	// range through all tests
+	for _, e := range loginTest {
+		postedData := url.Values{}
+		postedData.Add("email", e.email)
+		postedData.Add("password", "password")
+
+		// create request
+		req, _ := http.NewRequest("POST", "/user/login", strings.NewReader(postedData.Encode()))
+		ctx := getCtx(req)
+		req = req.WithContext(ctx)
+
+		// set the header
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+		rr := httptest.NewRecorder()
+
+		handler := http.HandlerFunc(Repo.PostShowLogin)
+
+		handler.ServeHTTP(rr, req)
+
+		if rr.Code != e.expectedStatusCode {
+			t.Errorf("failed %s: expected code %d, but got %d ", e.name, e.expectedStatusCode, rr.Code)
+		}
+
+		if e.expectedLocation != "" {
+			// get the URL from test
+			actualLoc, _ := rr.Result().Location()
+			if actualLoc.String() != e.expectedLocation {
+				t.Errorf("failed %s: expected location %s, but got location %s", e.name, e.expectedLocation, actualLoc.String())
+			}
+		}
+
+		// checking for expected values in HTML
+		if e.expectedHTML != "" {
+			// read the response body into a string
+			html := rr.Body.String()
+			if !strings.Contains(html, e.expectedHTML) {
+				t.Errorf("failed %s: expected HTML %s, but got HTML %s", e.name, e.expectedHTML, html)
+			}
+		}
+
+	}
+}
 
 func getCtx(req *http.Request) context.Context {
 	// Load retrieves the session data for the given token from the session store,
