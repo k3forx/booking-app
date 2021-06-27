@@ -9,7 +9,7 @@
 {{ end }}
 
 {{ define "page-title" }}
-  All Reservations
+All Reservations
 {{ end }}
 
 {{ define "content" }}
@@ -32,7 +32,7 @@
       <tr>
         <td>{{ .ID }}</td>
         <td>
-          <a href="/admin/reservations/all/{{ .ID }}">
+          <a href="/admin/reservations/all/{{ .ID }}/show">
             {{ .LastName }}
           </a>
         </td>
@@ -54,11 +54,11 @@
   type="text/javascript"
 ></script>
 <script>
-  document.addEventListener("DOMContentLoaded", function(){
-  const dataTable = new simpleDatatables.DataTable("#all-res", {
+  document.addEventListener("DOMContentLoaded", function () {
+    const dataTable = new simpleDatatables.DataTable("#all-res", {
       select: 3,
       sort: "desc",
-    })
-  })
+    });
+  });
 </script>
 {{ end }}

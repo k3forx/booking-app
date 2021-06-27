@@ -17,6 +17,7 @@
     "novalidate",
     "pgconn",
     "pgdg",
+    "printf",
     "psql",
     "rangepicker",
     "tmpl",

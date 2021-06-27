@@ -21,6 +21,8 @@ Reservation Details
 >
   <input type="hidden" name="csrf_token" value="{{ .CSRFToken }}" />
   <input type="hidden" name="room_id" value="{{ $res.RoomID }}" />
+  <input type="hidden" name="year" value="{{ index .StringMap "year" }}" />
+  <input type="hidden" name="month" value="{{ index .StringMap "month" }}" />
 
   <div class="form-group mt-3">
     <label for="first_name">First Name:</label>
@@ -77,7 +79,9 @@ Reservation Details
   <div class="float-left">
     <input type="submit" class="btn btn-primary" value="Save Reservation" />
     {{ if eq $src "cal" }}
-      <a href="#!" onclick="window.history.go(-1)" class="btn btn-warning">Cancel</a>
+    <a href="#!" onclick="window.history.go(-1)" class="btn btn-warning"
+      >Cancel</a
+    >
     {{ else }}
     <a href="/admin/reservations-{{ $src }}" class="btn btn-warning">Cancel</a>
     {{ end }}
@@ -104,7 +108,10 @@ Reservation Details
       msg: "Are you sure?",
       callback: function (result) {
         if (result !== false) {
-          window.location.href = "/admin/process-reservation/{{ $src }}/" + id;
+          window.location.href =
+            "/admin/process-reservation/{{ $src }}/" +
+            id +
+            "/do?year={{ index .StringMap "year" }}&month={{ index .StringMap "month" }}";
         }
       },
     });
@@ -116,7 +123,7 @@ Reservation Details
       msg: "Are you sure?",
       callback: function (result) {
         if (result !== false) {
-          window.location.href = "/admin/delete-reservation/{{ $src }}/" + id;
+          window.location.href = "/admin/delete-reservation/{{ $src }}/" + id + "/do?year={{ index .StringMap "year" }}&month={{ index .StringMap "month" }}";
         }
       },
     });
