@@ -91,3 +91,11 @@ func (m *testDBRepo) GetRestrictionsForRoomByDate(roomID int, start, end time.Ti
 	var restrictions []models.RoomRestriction
 	return restrictions, nil
 }
+
+func (m *testDBRepo) InsertBlockForRoom(id int, startDate time.Time) error {
+	return nil
+}
+
+func (m *testDBRepo) DeleteBlockForRoom(id int) error {
+	return nil
+}

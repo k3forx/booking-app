@@ -525,6 +525,12 @@ func (m *Repository) AdminShowReservation(w http.ResponseWriter, r *http.Request
 	stringMap := make(map[string]string)
 	stringMap["src"] = src
 
+	year := r.URL.Query().Get("year")
+	month := r.URL.Query().Get("month")
+
+	stringMap["year"] = year
+	stringMap["month"] = month
+
 	m.App.InfoLog.Printf("Search a reservation by ID: %d", id)
 
 	reservation, err := m.DB.GetReservationByID(id)
@@ -586,9 +592,18 @@ func (m *Repository) AdminPostShowReservation(w http.ResponseWriter, r *http.Req
 	}
 	m.App.InfoLog.Printf("Updated a reservation")
 
+	month := r.Form.Get("month")
+	year := r.Form.Get("year")
+
 	m.App.Session.Put(r.Context(), "flash", "Changes saved")
+
+	if year == "" {
+		http.Redirect(w, r, fmt.Sprintf("/admin/reservations-%s", src), http.StatusSeeOther)
+	} else {
+		http.Redirect(w, r, fmt.Sprintf("/admin/reservations-calendar?year=%s&month=%s", year, month), http.StatusSeeOther)
+	}
+
 	m.App.InfoLog.Println("AdminPostShowReservation is finished")
-	http.Redirect(w, r, fmt.Sprintf("/admin/reservations-%s", src), http.StatusSeeOther)
 }
 
 // AdminReservationsCalendar displays the reservation calendar
@@ -688,11 +703,23 @@ func (m *Repository) AdminProcessReservation(w http.ResponseWriter, r *http.Requ
 	id, _ := strconv.Atoi(chi.URLParam(r, "id"))
 	src := chi.URLParam(r, "src")
 
-	_ = m.DB.UpdateProcessedForReservation(id, 1)
+	err := m.DB.UpdateProcessedForReservation(id, 1)
+	if err != nil {
+		m.App.ErrorLog.Printf("failed to process a reservation: %s", err)
+		return
+	}
+
+	year := r.URL.Query().Get("year")
+	month := r.URL.Query().Get("month")
 
 	m.App.Session.Put(r.Context(), "flash", "Reservation is marked as processed")
 
-	http.Redirect(w, r, fmt.Sprintf("/admin/reservations-%s", src), http.StatusSeeOther)
+	if year == "" {
+		http.Redirect(w, r, fmt.Sprintf("/admin/reservations-%s", src), http.StatusSeeOther)
+	} else {
+		http.Redirect(w, r, fmt.Sprintf("/admin/reservations-calendar?year=%s&month=%s", year, month), http.StatusSeeOther)
+	}
+
 	m.App.InfoLog.Println("AdminProcessReservation is finished")
 }
 
@@ -702,10 +729,100 @@ func (m *Repository) AdminDeleteReservation(w http.ResponseWriter, r *http.Reque
 	id, _ := strconv.Atoi(chi.URLParam(r, "id"))
 	src := chi.URLParam(r, "src")
 
-	_ = m.DB.DeleteReservationByID(id)
+	err := m.DB.DeleteReservationByID(id)
+	if err != nil {
+		m.App.ErrorLog.Printf("failed to process a reservation: %s", err)
+		return
+	}
+
+	year := r.URL.Query().Get("year")
+	month := r.URL.Query().Get("month")
 
 	m.App.Session.Put(r.Context(), "flash", "Reservation is deleted")
 
-	http.Redirect(w, r, fmt.Sprintf("/admin/reservations-%s", src), http.StatusSeeOther)
+	if year == "" {
+		http.Redirect(w, r, fmt.Sprintf("/admin/reservations-%s", src), http.StatusSeeOther)
+	} else {
+		http.Redirect(w, r, fmt.Sprintf("/admin/reservations-calendar?year=%s&month=%s", year, month), http.StatusSeeOther)
+	}
+
 	m.App.InfoLog.Println("AdminDeleteReservation is finished")
+}
+
+// AdminPostReservationsCalendar handles post of reservations calendar
+func (m *Repository) AdminPostReservationsCalendar(w http.ResponseWriter, r *http.Request) {
+	m.App.InfoLog.Println("AdminPostReservationsCalendar starts")
+
+	err := r.ParseForm()
+	if err != nil {
+		m.App.ErrorLog.Printf("failed to parse form: %s", err)
+		return
+	}
+
+	year, _ := strconv.Atoi(r.Form.Get("year"))
+	month, _ := strconv.Atoi(r.Form.Get("month"))
+
+	// Process blocks
+	rooms, err := m.DB.GetAllRooms()
+	if err != nil {
+		m.App.ErrorLog.Printf("failed to get rooms: %s", err)
+		return
+	}
+
+	form := forms.New(r.PostForm)
+
+	for _, room := range rooms {
+		// Get the blockMap for the session, loop through entire, map, if we have an entry in the map
+		// that does not exist in our posted data, and if th restriction id > 0, then it is a block we need to
+		// remove
+		curMap := m.App.Session.Get(r.Context(), fmt.Sprintf("block_map_%d", room.ID)).(map[string]int)
+		for name, value := range curMap {
+			// ok will be false if the value is not in the map
+			if val, ok := curMap[name]; ok {
+				// only pay attention to values > 0, and that are not in the form post
+				// the rest are just placeholders for days without blocks
+				if val > 0 {
+					if !form.Has(fmt.Sprintf("remove_block_%d_%s", room.ID, name)) {
+						// delete the restriction by Id
+						err := m.DB.DeleteBlockForRoom(value)
+						if err != nil {
+							m.App.ErrorLog.Printf("failed to delete room by id: %s", err)
+							return
+						}
+					}
+				}
+			}
+		}
+	}
+
+	// Now handle new blocks
+	for name, _ := range r.PostForm {
+		if strings.HasPrefix(name, "add_block") {
+			exploded := strings.Split(name, "_")
+			roomID, err := strconv.Atoi(exploded[2])
+			if err != nil {
+				m.App.ErrorLog.Printf("failed to convert roomID to int: %s", err)
+				return
+			}
+			t, _ := time.Parse("2006-01-2", exploded[3])
+			if err != nil {
+				m.App.ErrorLog.Printf("failed to parse time: %s", err)
+				return
+			}
+
+			// insert a new block
+			m.App.InfoLog.Printf("Insert a new block by roomID=%d, startDate=%s", roomID, t.Format("2006-01-02"))
+			err = m.DB.InsertBlockForRoom(roomID, t)
+			if err != nil {
+				m.App.ErrorLog.Printf("failed to insert a new room: %s", err)
+				return
+			}
+		}
+	}
+
+	m.App.Session.Put(r.Context(), "flash", "Changes saved")
+
+	http.Redirect(w, r, fmt.Sprintf("/admin/reservations-calendar?year=%d&month=%d", year, month), http.StatusSeeOther)
+
+	m.App.InfoLog.Println("AdminPostReservationsCalendar starts")
 }
